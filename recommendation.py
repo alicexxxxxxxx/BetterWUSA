@@ -4,16 +4,23 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
-def recommendation(user_prompt, top_n=5):
-    club_dic = {}
+def recommendation(user_prompt, top=15):
     with open("scraper/club_list.json", "r") as file:
-        club_info = json.load(file)
-        for i in range(len(club_info)):
-            name_data = club_info[i]['name']
-            info_data = club_info[i]['info']
-            club_dic[name_data] = info_data
-    club_info_embeddings = model.encode(list(club_dic.values()))
+        clubs = json.load(file)
+    info = [club.get("info", "") for club in clubs]
+    club_info_embeddings = model.encode(info, show_progress_bar=False)
     user_prompt_embeddings = model.encode([user_prompt])
-    cosine_similarity(user_prompt_embeddings, club_info_embeddings)
+
+    score = cosine_similarity(user_prompt_embeddings, club_info_embeddings)[0]
+
+    scored_clubs = []
+    for index, score in enumerate(score):
+        scored_clubs.append({
+            "name": clubs[index].get("name"),
+            "info": clubs[index].get("info")
+        })
+
+    scored_clubs.sort(key=lambda x: x['score'], reverse=True)
+    return scored_clubs[:top]
 
 
