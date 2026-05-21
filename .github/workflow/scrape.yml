@@ -1,0 +1,34 @@
+name: Monthly Web Scraper
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        playwright install --with-deps chromium
+
+    - name: Run Scraper
+      run: python scraper.py
+
+    - name: Commit and Push changes
+      run: |
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+        git add club_list.json
+        git commit -m "Auto-update data" || exit 0
+        git push
