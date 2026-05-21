@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetterWUSA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/img/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<header class="text-center my-5 py-4 bg-dark text-white rounded-3 container">
+    <h1 class="display-4 fw-bold text-warning">Waterloo Clubs Directory</h1>
+    <p class="lead">These are the current clubs running at Waterloo this active term</p>
+</header>
+
+<main class="container">
+    <label for="prompt">Type your prompt:</label>
+    <input type="text" id="prompt" name="prompt">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for club in clubs %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">{{ club.name }}</h5>
+                    <span class="badge bg-secondary mb-2">{{club.term}}</span>
+                    <p class="card-text text-muted">{{club.info}}</p>
+                    <a href="{{ club.link }}" class="btn btn-primary btn-sm" target="_blank">Visit Club Site</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center">
+            <p class="alert alert-warning">My bad gang something wrong with the site rn hang tight</p>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+</body>
+</html>
