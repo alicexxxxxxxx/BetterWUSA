@@ -11,28 +11,34 @@ def recommendation(user_prompt, top=15, include_name=True, debug=False):
     texts = []
     for club in clubs:
         parts = []
-        if include_name:
-            name = club.get("name", "")
-            if name:
-                parts.append(name)
-        info = club.get("info", "")
+        name = club.get("name", "").strip()
+        info = club.get("info", "").strip()
+
+        if "no description" in info:
+            info = ""
+
+        if include_name and name:
+            parts.append(f"{name} {name}")
+
         if info:
             parts.append(info)
+
         texts.append(" - ".join(parts) if parts else "")
 
-    club_info_embeddings = model.encode(texts, show_progress_bar=False)
-    user_prompt_embeddings = model.encode([user_prompt])[0:1]
 
-    score = cosine_similarity(user_prompt_embeddings, club_info_embeddings)[0]
+    club_info_embeddings = model.encode(texts, show_progress_bar=False)
+    user_prompt_embeddings = model.encode([user_prompt])
+
+    similarity_score = cosine_similarity(user_prompt_embeddings, club_info_embeddings)[0]
 
     scored_clubs = []
-    for index, score in enumerate(score):
+    for index, current_score in enumerate(similarity_score):
         scored_clubs.append({
             "name": clubs[index].get("name"),
             "term": clubs[index].get("term"),
             "info": clubs[index].get("info"),
             "link": clubs[index].get("link"),
-            "score": float(score)
+            "score": float(current_score)
         })
 
     scored_clubs.sort(key=lambda x: x['score'], reverse=True)
