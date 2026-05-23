@@ -16,7 +16,7 @@ def main():
 
         page = context.new_page()
 
-        page.route("**/*", block_resources)
+        context.route("**/*", block_resources)
 
         page.goto("https://clubs.wusa.ca/club_listings", wait_until="networkidle")
         time.sleep(3)
@@ -31,16 +31,40 @@ def main():
                 try:
                     club_name = club.locator(".col-lg-4 h4").inner_text()
                     active_term = club.locator(".col-lg-4 button").inner_text()
-                    description = club.locator(".col-lg-8 .short-text").inner_text()
+
+                    try:
+                        short_desc = club.locator(".col-lg-8 .short-text").inner_text().strip()
+                    except:
+                        short_desc = "No description provided."
 
                     link_element = club.locator('a:has-text("Learn More")')
                     relative_url = link_element.get_attribute("href")
                     full_url = f"https://clubs.wusa.ca{relative_url}" if relative_url else None
 
+                    description = short_desc
+
+                    if full_url:
+                        club_page = context.new_page()
+                        club_page.goto(full_url, wait_until="domcontentloaded")
+
+                        try:
+                            description_locator = club_page.locator("#full-text")
+                            description_locator.wait_for(state="attached", timeout=3000)
+                            description = description_locator.text_content().strip()
+                            if not description:
+                                description = club_page.locator("#short-text").text_content().strip()
+
+                        except Exception as inner_e:
+                            print(f"Used grid fallback for {club_name} | Error: {inner_e}")
+                            pass
+
+                        club_page.close()
+
 
                     print(f"Club: {club_name.strip()} | Term: {active_term.strip()} | Description: {description.strip()}")
-                    club_listings.append({"name": club_name.strip(), "term": active_term.strip(), "info": description.strip(), "link": full_url.strip()})
+                    club_listings.append({"name": club_name.strip(), "term": active_term.strip(), "info": description.strip(), "link": full_url if full_url else ""})
                 except Exception as e:
+                    print(f"CRITICAL ERROR skipping a club: {e}")
                     continue
 
             next_button = page.locator('a[rel="next"]:has-text("Next")')

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BetterWUSA</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/img/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
@@ -14,8 +14,42 @@
 </header>
 
 <main class="container">
-    <label for="prompt">Type your prompt:</label>
-    <input type="text" id="prompt" name="prompt">
+    <form action="/" method="POST">
+        <label for="prompt">Type your prompt:</label>
+        <input type="text" id="prompt" name="prompt">
+        <button type="submit">Find Clubs</button>
+    </form>
+    {%if query%}
+    <div class="mt-4">
+        <h3 class="mb-3">Recommendations for your prompt:</h3>
+        {% if recommendations %}
+        <div class="row row-cols-1 row-cols-md-2 g-3">
+            {% for club in recommendations %}
+            <div class="col">
+                <div class="card h-100 border-success-subtle">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ club.name }}</h5>
+                        {% if club.term %}
+                        <span class="badge bg-secondary mb-2">{{ club.term }}</span>
+                        {% endif %}
+                        <p class="card-text text-muted">{{ club.info }}</p>
+                        {% if club.link %}
+                        <a href="{{ club.link }}" class="btn btn-success btn-sm" target="_blank">Visit Club Site</a>
+                        {% endif %}
+                        {% if club.score is defined %}
+                        <p class="mt-2 mb-0"><small class="text-muted">Match: {{ "%.3f"|format(club.score) }}</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="alert alert-warning">No recommendations found for that prompt.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for club in clubs %}
         <div class="col">
