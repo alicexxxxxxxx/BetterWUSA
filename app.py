@@ -3,6 +3,7 @@ from recommendation import *
 app = Flask(__name__)
 @app.route("/", methods=['GET', 'POST'])
 def main():
+    '''Loads the data so we can render the html site'''
     try:
         with open("scraper/club_list.json", "r") as file:
             club_data = json.load(file)
@@ -12,6 +13,7 @@ def main():
     user_query = None
     result = None
 
+    '''If we receive any prompt from the user we come here and it will process through our recommendation system and return it through render template'''
     if request.method=='POST':
         user_query = request.form.get('prompt')
         if user_query and user_query.strip() != "":
